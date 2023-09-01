@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Quota;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class QuotaController extends Controller
@@ -70,5 +71,26 @@ class QuotaController extends Controller
     {
         return [];
     }
+
+
+    /**
+     * Return quota with where Conditions
+     * 
+     * @param Request $request
+     * 
+     * @return JsonResponse
+     * 
+     */
+
+     public function get_quota( Request $request ): JsonResponse
+     {
+
+        $quota = Quota::where($request->all())->get();
+
+        return response()->json([
+            "success" => true,
+            "data" => $quota
+        ]);
+     }
 
 }

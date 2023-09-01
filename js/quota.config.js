@@ -56,6 +56,11 @@ window.Ajax = {
         "X-CSRF-TOKEN": document.head.querySelector("[name='X-CSRF-Token']").content
     },
     get: function (url = "", data = {}) {
+        const urlParams = new URLSearchParams(data);
+
+        if (urlParams.size > 0) {
+            url += `?${urlParams.toString()}`;
+        }
         const response = fetch(url, {
             method: "GET",
             mode: "cors",
@@ -63,7 +68,6 @@ window.Ajax = {
             headers: this.headers,
             redirect: "follow",
             referrerPolicy: "no-referrer",
-            body: JSON.stringify(data),
         });
         return response.then(res => res.json());
     },
@@ -208,7 +212,7 @@ document.onreadystatechange = function () {
                     sport, gender, category, max_quota, min_quota, reserve_quota
                 }).then(res => {
                     if (res.success === true) {
-                        toast.querySelector(".toast-body").innerHTML = `<p class="m-0 text-success">res.message</p>`;
+                        toast.querySelector(".toast-body").innerHTML = `<p class="m-0 text-success">${res.message}</p>`;
                         setTimeout(() => {
                             location.reload();
                         }, 3000);
@@ -274,24 +278,38 @@ document.onreadystatechange = function () {
                         display: "none"
                     });
 
-                    let countriesList  = coutries.value.split("|").map( c => c.trim() );
+                    Ajax.get("get-quota", { sport: sports.value, gender: gender.value, category: categories.value })
+                        .then(res => {
+                            if (res.data.length > 0) {
+                                let countriesList = coutries.value.split("|").map(c => c.trim());
 
-                    const trNodes = [];
-                    countriesList.forEach((item, i) => {
-                        const tr = document.createElement("tr");
-                        tr.innerHTML = `
-                        <td>${++i}</td>
-                        <td>${item}</td>
-                        <td>${Quota[sports.value].name}</td>
-                        <td>${Quota[sports.value].categories[gender.value][categories.value]}</td>
-                        <td><input type="text" name="min_quota"/></td>
-                        <td><input type="text" name="max_quota"/></td>
-                        <td><input type="text" name="reserve_quota"/></td>
-                        `;
-                        trNodes.push( tr );
-                    });
+                                const trNodes = [];
+                                countriesList.forEach((item, i) => {
+                                    const tr = document.createElement("tr");
+                                    tr.innerHTML = `
+                                        <td>${++i}</td>
+                                        <td>${item}</td>
+                                        <td>${Quota[sports.value].name}</td>
+                                        <td>${Quota[sports.value].categories[gender.value][categories.value]}</td>
+                                        <td><input type="text" class="form-control" name="min_quota"/></td>
+                                        <td><input type="text" class="form-control" name="max_quota"/></td>
+                                        <td><input type="text" class="form-control" name="reserve_quota"/></td>
+                                    `;
+                                    trNodes.push(tr);
+                                });
+                                document.querySelector('#country-table tbody').innerHTML = '';
+                                document.querySelector('#country-table tbody').append(...trNodes);
+                            }
+                            else{
+                                const toast = document.querySelector("#toast-quota");
+                                toast.querySelector(".toast-body").innerHTML = "<p class='m-0 text-danger'>Sorry! No data found with selected sports match</p>";
 
-                    document.querySelector('#country-table tbody').append(...trNodes);
+                                Object.assign(toast.style, { zIndex: 1050 });
+                                (new bootstrap.Toast(toast, {
+                                    delay: 3000
+                                })).show();
+                            }
+                        });
                 }
             });
         }

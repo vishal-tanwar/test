@@ -50,7 +50,7 @@
                 </div>
             </div>
 
-            <div class="col-12 col-md-10">
+            <div class="col-12 col-md-10 mt-3">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-content-center">
                         <h2>State List:</h2>
@@ -72,8 +72,19 @@
                             <tbody></tbody>
                         </table>
                     </div>
+
+                    <div class="card-footer text-end">
+                        <button class="btn btn-success px-5">Save</button>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="toast align-items-center position-absolute m-3 me-4 top-0 end-0" id="toast-quota" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body"></div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     </div>
 
