@@ -16,6 +16,9 @@ use App\Http\Controllers\QuotaController;
 
 
 Route::controller(QuotaController::class)->group(function(){
-    Route::get('/', [QuotaController::class, "index"])->name("quota");
-    Route::post('/', [QuotaController::class, "reserveQuota"])->name('quota.reserve');
+    Route::get('/', "index")->name("quota");
+    Route::post('/', "saveQuota")->name('quota.save');
+
+    Route::get("/reserve-quota", 'reserveQuota')->name("quota.reserve");
+    Route::post("/reserve-quota", 'saveReserveQuota')->name("quota.reserve.save");
 });

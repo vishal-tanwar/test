@@ -2,7 +2,7 @@
 
 const Quota = {
     archery: {
-        "name" : "Archery",
+        "name": "Archery",
         "categories": {
             "male": {
                 archery_1: "Archery 1",
@@ -17,7 +17,7 @@ const Quota = {
         }
     },
     badminton: {
-        "name" : "Badminton",
+        "name": "Badminton",
         "categories": {
             "male": {
                 badminton_1: "Badminton 1",
@@ -32,7 +32,7 @@ const Quota = {
         }
     },
     football: {
-        "name" : "Football",
+        "name": "Football",
         "categories": {
             "male": {
                 football_1: "Football 1",
@@ -55,37 +55,37 @@ window.Ajax = {
         "Content-Type": "application/json",
         "X-CSRF-TOKEN": document.head.querySelector("[name='X-CSRF-Token']").content
     },
-    get: function (url = "", data = {}){
+    get: function (url = "", data = {}) {
         const response = fetch(url, {
-            method: "GET", 
-            mode: "cors", 
-            cache: "no-cache", 
+            method: "GET",
+            mode: "cors",
+            cache: "no-cache",
             headers: this.headers,
-            redirect: "follow", 
-            referrerPolicy: "no-referrer", 
-            body: JSON.stringify(data), 
+            redirect: "follow",
+            referrerPolicy: "no-referrer",
+            body: JSON.stringify(data),
         });
-        return response.then(res => res.json()); 
+        return response.then(res => res.json());
     },
-     post: function(url = "", data = {}) {
-        const response =  fetch(url, {
+    post: function (url = "", data = {}) {
+        const response = fetch(url, {
             method: "POST",
-            mode: "cors", 
+            mode: "cors",
             cache: "default",
             headers: this.headers,
-            redirect: "follow", 
-            referrerPolicy: "no-referrer", 
-            body: JSON.stringify(data), 
+            redirect: "follow",
+            referrerPolicy: "no-referrer",
+            body: JSON.stringify(data),
         });
-        return response.then( res => res.json() ); 
+        return response.then(res => res.json());
     },
 }
 
 
 
 
-document.onreadystatechange = function(){
-    if( document.readyState == "complete"){
+document.onreadystatechange = function () {
+    if (document.readyState == "complete") {
 
         // BS Toast
         // var toastElList = [].slice.call(document.querySelectorAll('.toast'))
@@ -110,13 +110,13 @@ document.onreadystatechange = function(){
 
         // Create Catgories on change sport and gender
 
-        window.updateCategories = function(){
+        window.updateCategories = function () {
             const sports = document.querySelector("#sports").value;
             const gender = document.querySelector("#sports-gender").value;
             const catElem = document.querySelector("#sports-categories");
 
 
-            if( sports && gender ){
+            if (sports && gender) {
 
                 let categories = Quota[sports].categories[gender];
 
@@ -128,11 +128,11 @@ document.onreadystatechange = function(){
                     return option;
                 });
 
-                if (catElem.childElementCount > 1 ){
+                if (catElem.childElementCount > 1) {
 
                     let prevNodes = Array.from(catElem.children).slice(1);
 
-                    prevNodes.forEach( (el) => {
+                    prevNodes.forEach((el) => {
                         el.remove();
                     })
                 }
@@ -140,7 +140,7 @@ document.onreadystatechange = function(){
                 catElem.append(...categoryList);
             }
 
-            else{
+            else {
                 if (catElem.childElementCount > 1) {
 
                     let prevNodes = Array.from(catElem.children).slice(1);
@@ -152,7 +152,7 @@ document.onreadystatechange = function(){
             }
         }
 
-        window.addQuota = function(){
+        window.addQuota = function () {
 
             const sports = document.querySelector("#sports");
             const gender = document.querySelector("#sports-gender");
@@ -181,7 +181,7 @@ document.onreadystatechange = function(){
                 return false;
             }
 
-            else{
+            else {
                 Object.assign(addQuotaErr.style, {
                     display: "none"
                 });
@@ -191,40 +191,109 @@ document.onreadystatechange = function(){
             }
         }
 
+        if (document.querySelector("#add-reserved-quota")) {
 
-        document.querySelector("#add-reserved-quota").addEventListener('click', function(){
-            const sport = document.querySelector("#sports").value;
-            const gender = document.querySelector("#sports-gender").value;
-            const category = document.querySelector("#sports-categories").value;
-            const min_quota = document.querySelector('[name="min_quota"]').value;
-            const max_quota = document.querySelector('[name="max_quota"]').value;
-            const reserve_quota = document.querySelector('[name="reserve_quota"]').value;
 
-            const toast = document.querySelector("#toast-quota");
+            document.querySelector("#add-reserved-quota").addEventListener('click', function () {
+                const sport = document.querySelector("#sports").value;
+                const gender = document.querySelector("#sports-gender").value;
+                const category = document.querySelector("#sports-categories").value;
+                const min_quota = document.querySelector('[name="min_quota"]').value;
+                const max_quota = document.querySelector('[name="max_quota"]').value;
+                const reserve_quota = document.querySelector('[name="reserve_quota"]').value;
 
-            Ajax.post('/', {
-                sport,gender,category,max_quota,min_quota,reserve_quota
-            }).then(res => { 
-                if( res.success === true ){
-                    toast.querySelector(".toast-body").innerHTML = `<p class="m-0 text-success">res.message</p>`;
-                    setTimeout( () => {
-                        location.reload();
-                    }, 3000 );
+                const toast = document.querySelector("#toast-quota");
+
+                Ajax.post('/', {
+                    sport, gender, category, max_quota, min_quota, reserve_quota
+                }).then(res => {
+                    if (res.success === true) {
+                        toast.querySelector(".toast-body").innerHTML = `<p class="m-0 text-success">res.message</p>`;
+                        setTimeout(() => {
+                            location.reload();
+                        }, 3000);
+                    }
+                    else {
+
+                        let errorsHtml = Object.values(res.errors).map(item => {
+                            return `<p class="m-0 text-danger">${item[0]}</p>`
+                        }).join("");
+
+                        toast.querySelector(".toast-body").innerHTML = errorsHtml;
+                    }
+                    Object.assign(toast.style, { zIndex: 1050 });
+                    (new bootstrap.Toast(toast, {
+                        delay: 3000
+                    })).show();
+                });
+
+            });
+
+        }
+        if (document.querySelector("#generate-country")) {
+            document.querySelector("#generate-country").addEventListener("click", function (e) {
+                e.preventDefault();
+
+                const sports = document.querySelector("#sports");
+                const gender = document.querySelector("#sports-gender");
+                const categories = document.querySelector("#sports-categories");
+                const coutries = document.querySelector("#sports-states");
+                const addQuotaErr = document.querySelector("#add-quota-error");
+
+                if (!sports.value) {
+                    addQuotaErr.innerText = "Choose at least one sport!";
+                    Object.assign(addQuotaErr.style, {
+                        display: "block"
+                    });
+                    return false;
                 }
-                else{
-
-                    let errorsHtml = Object.values(res.errors).map(item => {
-                        return `<p class="m-0 text-danger">${item[0]}</p>`
-                    }).join("");
-
-                    toast.querySelector(".toast-body").innerHTML = errorsHtml;
+                else if (!gender.value) {
+                    addQuotaErr.innerText = "Choose gender!";
+                    Object.assign(addQuotaErr.style, {
+                        display: "bloxk"
+                    });
+                    return false;
                 }
-                Object.assign(toast.style, {zIndex: 1050});
-                (new bootstrap.Toast(toast, {
-                    delay: 3000
-                })).show();
-             });
+                else if (!categories.value) {
+                    addQuotaErr.innerText = "Choose at least one Category";
+                    Object.assign(addQuotaErr.style, {
+                        display: "block"
+                    });
+                    return false;
+                }
+                else if (!coutries.value) {
+                    addQuotaErr.innerText = "Country cannot be empty";
+                    Object.assign(addQuotaErr.style, {
+                        display: "block"
+                    });
+                    return false;
+                }
 
-        });
+                else {
+                    Object.assign(addQuotaErr.style, {
+                        display: "none"
+                    });
+
+                    let countriesList  = coutries.value.split("|").map( c => c.trim() );
+
+                    const trNodes = [];
+                    countriesList.forEach((item, i) => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                        <td>${++i}</td>
+                        <td>${item}</td>
+                        <td>${Quota[sports.value].name}</td>
+                        <td>${Quota[sports.value].categories[gender.value][categories.value]}</td>
+                        <td><input type="text" name="min_quota"/></td>
+                        <td><input type="text" name="max_quota"/></td>
+                        <td><input type="text" name="reserve_quota"/></td>
+                        `;
+                        trNodes.push( tr );
+                    });
+
+                    document.querySelector('#country-table tbody').append(...trNodes);
+                }
+            });
+        }
     }
 }

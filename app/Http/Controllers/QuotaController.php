@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class QuotaController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display the form of registration quota.
      * 
      * @return 
      */
@@ -23,7 +23,7 @@ class QuotaController extends Controller
      * @param \Illuminate\Http\Request
      * 
      */
-    public function reserveQuota(Request $request)
+    public function saveQuota(Request $request)
     {
         $validation = \Validator::make($request->all(), [
             "category" => "required|string",
@@ -47,10 +47,28 @@ class QuotaController extends Controller
         ]);
     }
 
+    /**
+     * Display the form for set quota according to state #Endpoint[Get(/reserve-quota)]
+     * 
+     * @return \Illuminate\Contracts\View\View;
+     */
 
-    public function master()
+    public function reserveQuota(): \Illuminate\Contracts\View\View
     {
-        return "Master Page";
+        return view('pages.set-quota');
+    }
+
+
+    /**
+     * Save reservation quota in database memory
+     * 
+     * @param Request $request
+     */
+    
+
+    public function saveReserveQuota( Request $request ): mixed
+    {
+        return [];
     }
 
 }
