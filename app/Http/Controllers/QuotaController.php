@@ -12,7 +12,7 @@ class QuotaController extends Controller
      * 
      * @return 
      */
-    public function index( string $id = '' )
+    public function index(string $id = '')
     {
         return view('pages.home');
     }
@@ -23,12 +23,33 @@ class QuotaController extends Controller
      * @param \Illuminate\Http\Request
      * 
      */
-    public function reserveQuota( Request $request ){
-        return $request->all();
+    public function reserveQuota(Request $request)
+    {
+        $validation = \Validator::make($request->all(), [
+            "category" => "required|string",
+            "gender" => "required|string",
+            "max_quota" => "required|integer",
+            "min_quota" => "required|integer",
+            "reserve_quota" => "required|integer",
+            "sport" => "required|string",
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json([
+                "success" => false,
+                "errors" => $validation->errors()
+            ]);
+        }
+        Quota::create($request->all());
+        return response()->json([
+            "success" => true,
+            "message" => "Quota registered successfully"
+        ]);
     }
 
 
-    public function master(){
+    public function master()
+    {
         return "Master Page";
     }
 

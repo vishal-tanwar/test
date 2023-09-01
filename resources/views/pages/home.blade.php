@@ -45,6 +45,8 @@
         </div>
     </div>
 
+    
+
     <div class="modal fade" id="reserve-quota-modal" tabindex="-1" aria-labelledby="reserveQuota" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -54,6 +56,7 @@
             </div>
             
             <div class="modal-body">
+                @csrf
                 <div class="row mb-2">
                     <div class="col"><b>Min Quota:</b></div>
                     <div class="col">
@@ -75,5 +78,14 @@
             </div>
         </div>
     </div>
+
+    <!-- <template id="toast"> -->
+        <div class="toast align-items-center position-absolute m-3 me-4 top-0 end-0" id="toast-quota" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body"></div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            </div>
+    <!-- </template> -->
 
 @endsection 

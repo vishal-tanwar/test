@@ -50,38 +50,34 @@ const Quota = {
 
 
 window.Ajax = {
+    headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": document.head.querySelector("[name='X-CSRF-Token']").content
+    },
     get: function (url = "", data = {}){
         const response = fetch(url, {
-            method: "GET", // *GET, POST, PUT, DELETE, etc.
-            mode: "no-cors", // no-cors, *cors, same-origin
-            cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-            headers: {
-                "Content-Type": "application/json",
-                // 'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            redirect: "follow", // manual, *follow, error
-            referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-            body: JSON.stringify(data), // body data type must match "Content-Type" header
+            method: "GET", 
+            mode: "cors", 
+            cache: "no-cache", 
+            headers: this.headers,
+            redirect: "follow", 
+            referrerPolicy: "no-referrer", 
+            body: JSON.stringify(data), 
         });
-        return response; // parses JSON response into native JavaScript objects
+        return response.then(res => res.json()); 
     },
-    
-    post: function(url = "", data = {}) {
-        data._token = document.head.querySelector("[name='X-CSRF-Token']").content;
-        // Default options are marked with *
-        const response = fetch(url, {
-            method: "POST", // *GET, POST, PUT, DELETE, etc.
-            mode: "no-cors", // no-cors, *cors, same-origin
-            cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": document.head.querySelector("[name='X-CSRF-Token']").content
-            },
-            redirect: "follow", // manual, *follow, error
-            referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-            body: JSON.stringify(data), // body data type must match "Content-Type" header
+     post: function(url = "", data = {}) {
+        const response =  fetch(url, {
+            method: "POST",
+            mode: "cors", 
+            cache: "default",
+            headers: this.headers,
+            redirect: "follow", 
+            referrerPolicy: "no-referrer", 
+            body: JSON.stringify(data), 
         });
-        return response; // parses JSON response into native JavaScript objects
+        return response.then( res => res.json() ); 
     },
 }
 
@@ -90,6 +86,14 @@ window.Ajax = {
 
 document.onreadystatechange = function(){
     if( document.readyState == "complete"){
+
+        // BS Toast
+        // var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+        // var toastList = toastElList.map(function (toastEl) {
+        //     return new bootstrap.Toast(toastEl)
+        // })
+
+        // toastList.forEach( el => { el.show() });
 
         // Create Sports Dropdown
         const sports = document.querySelector("#sports");
@@ -181,7 +185,7 @@ document.onreadystatechange = function(){
                 Object.assign(addQuotaErr.style, {
                     display: "none"
                 });
-                
+
                 const quotaModal = new bootstrap.Modal(document.querySelector('#reserve-quota-modal'));
                 quotaModal.show();
             }
@@ -196,10 +200,30 @@ document.onreadystatechange = function(){
             const max_quota = document.querySelector('[name="max_quota"]').value;
             const reserve_quota = document.querySelector('[name="reserve_quota"]').value;
 
+            const toast = document.querySelector("#toast-quota");
+
             Ajax.post('/', {
                 sport,gender,category,max_quota,min_quota,reserve_quota
-            })
+            }).then(res => { 
+                if( res.success === true ){
+                    toast.querySelector(".toast-body").innerHTML = `<p class="m-0 text-success">res.message</p>`;
+                    setTimeout( () => {
+                        location.reload();
+                    }, 3000 );
+                }
+                else{
 
+                    let errorsHtml = Object.values(res.errors).map(item => {
+                        return `<p class="m-0 text-danger">${item[0]}</p>`
+                    }).join("");
+
+                    toast.querySelector(".toast-body").innerHTML = errorsHtml;
+                }
+                Object.assign(toast.style, {zIndex: 1050});
+                (new bootstrap.Toast(toast, {
+                    delay: 3000
+                })).show();
+             });
 
         });
     }
