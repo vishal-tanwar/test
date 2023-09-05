@@ -74,7 +74,7 @@
                     </div>
 
                     <div class="card-footer text-end">
-                        <button class="btn btn-success px-5">Save</button>
+                        <button class="btn btn-success px-5" onclick="return save()">Save</button>
                     </div>
                 </div>
             </div>

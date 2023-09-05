@@ -31,6 +31,7 @@
             <div class="navbar-nav">
                 <a class="nav-link active" aria-current="page" href="{{route('quota')}}">Master</a>
                 <a class="nav-link" href="{{route('quota.reserve')}}">Register Reservation</a>
+                <a class="nav-link" href="{{route('quota.reserve.view')}}">View Reservation</a>
             </div>
             </div>
         </div>

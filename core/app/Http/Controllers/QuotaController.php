@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Quota;
+use App\Models\Reservation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class QuotaController extends Controller
 {
@@ -68,8 +70,19 @@ class QuotaController extends Controller
     
 
     public function saveReserveQuota( Request $request ): mixed
-    {
-        return [];
+    {   
+        $data = array_map( function($d){
+            $now = Carbon::now()->toDateTimeString();
+            $d["created_at"] = $now;
+            $d["updated_at"] = $now;
+            return $d;
+        }, $request->all());
+
+        $isCreated = Reservation::insert( $data );
+        return response()->json([
+            "success" => $isCreated,
+            "message" => "Reservation saved successfully"
+        ]);
     }
 
 
@@ -85,12 +98,27 @@ class QuotaController extends Controller
      public function get_quota( Request $request ): JsonResponse
      {
 
-        $quota = Quota::where($request->all())->get();
+        $quota = Quota::where($request->all())->first();
 
         return response()->json([
             "success" => true,
             "data" => $quota
         ]);
+     }
+
+    /**
+     * Display reserve data in table view
+     * 
+     * @return \Illuminate\Contracts\View\View;
+     */
+
+     public function showReserveQuota(): \Illuminate\Contracts\View\View
+     {  
+
+        $reservation = Reservation::leftJoin("quotas", "quotas.id", "=", "reservations.quota_id")->select(["quotas.sport","quotas.gender","quotas.category", "reservations.*"])->get();
+
+        
+        return view('pages.view-reserve', ["data" => $reservation]);
      }
 
 }

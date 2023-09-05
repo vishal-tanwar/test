@@ -1,5 +1,6 @@
 <?php
 
+use App\Sms;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\QuotaController;
 
@@ -22,4 +23,5 @@ Route::controller(QuotaController::class)->group(function(){
 
     Route::get("/reserve-quota", 'reserveQuota')->name("quota.reserve");
     Route::post("/reserve-quota", 'saveReserveQuota')->name("quota.reserve.save");
+    Route::get("/reserved-quota", 'showReserveQuota')->name("quota.reserve.view");
 });

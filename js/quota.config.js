@@ -91,26 +91,22 @@ window.Ajax = {
 document.onreadystatechange = function () {
     if (document.readyState == "complete") {
 
-        // BS Toast
-        // var toastElList = [].slice.call(document.querySelectorAll('.toast'))
-        // var toastList = toastElList.map(function (toastEl) {
-        //     return new bootstrap.Toast(toastEl)
-        // })
-
-        // toastList.forEach( el => { el.show() });
+        
 
         // Create Sports Dropdown
         const sports = document.querySelector("#sports");
+        if (sports){
 
-        let sportsList = Object.keys(Quota).map(s => {
-            const option = document.createElement("option");
-
-            option.value = s;
-            option.text = Quota[s].name
-            return option;
-        });
-        // Append List
-        sports.append(...sportsList);
+            let sportsList = Object.keys(Quota).map(s => {
+                const option = document.createElement("option");
+                
+                option.value = s;
+                option.text = Quota[s].name
+                return option;
+            });
+            // Append List
+            sports.append(...sportsList);
+        }
 
         // Create Catgories on change sport and gender
 
@@ -280,20 +276,27 @@ document.onreadystatechange = function () {
 
                     Ajax.get("get-quota", { sport: sports.value, gender: gender.value, category: categories.value })
                         .then(res => {
-                            if (res.data.length > 0) {
+                            if (Object.keys(res.data).length > 0) {
+
+                                document.querySelector('#country-table').setAttribute('data-min', res.data.min_quota)
+                                document.querySelector('#country-table').setAttribute('data-max', res.data.max_quota)
+                                document.querySelector('#country-table').setAttribute('data-reserve', res.data.reserve_quota)
+                                document.querySelector('#country-table').setAttribute('data-id', res.data.id)
+
                                 let countriesList = coutries.value.split("|").map(c => c.trim());
 
                                 const trNodes = [];
                                 countriesList.forEach((item, i) => {
                                     const tr = document.createElement("tr");
+                                    tr.setAttribute('data-country', item);
                                     tr.innerHTML = `
                                         <td>${++i}</td>
                                         <td>${item}</td>
                                         <td>${Quota[sports.value].name}</td>
                                         <td>${Quota[sports.value].categories[gender.value][categories.value]}</td>
-                                        <td><input type="text" class="form-control" name="min_quota"/></td>
-                                        <td><input type="text" class="form-control" name="max_quota"/></td>
-                                        <td><input type="text" class="form-control" name="reserve_quota"/></td>
+                                        <td><input type="text" class="form-control" name="min_quota" onkeyup="return validateMin(event)" onkeypress="return onlyNumberKey(event)"/></td>
+                                        <td><input type="text" class="form-control" name="max_quota" onkeyup="return validateMax(event)" onkeypress="return onlyNumberKey(event)"/></td>
+                                        <td><input type="text" class="form-control" name="reserve_quota" onkeyup="return validateReserve(event)" onkeypress="return onlyNumberKey(event)"/></td>
                                     `;
                                     trNodes.push(tr);
                                 });
@@ -313,5 +316,169 @@ document.onreadystatechange = function () {
                 }
             });
         }
+
+        window.validateMin = function(e){
+            const total = parseInt(e.target.closest("#country-table").getAttribute("data-min"));
+
+            let min_inputs = Array.from( document.querySelectorAll("[name='min_quota']"));
+            let enterVal = parseInt(e.target.value);
+
+            min_inputs = min_inputs.filter( el => el != e.target );
+
+            let input_sum = min_inputs.reduce( (p, c) => {
+                let val = parseInt(c.value);
+                if (val){
+
+                    return p + val;
+                }
+                return p;
+            }, 0)
+
+            let remain = total - input_sum;;
+
+            if (enterVal>remain){
+                alert( `You can add minimum quota upto ${remain}`);
+                e.target.value = 0
+            }
+            
+        }
+
+        window.validateMax = function(e){
+            const total = parseInt(e.target.closest("#country-table").getAttribute("data-max"));
+
+            let min_inputs = Array.from(document.querySelectorAll("[name='max_quota']"));
+            let enterVal = parseInt(e.target.value);
+
+            min_inputs = min_inputs.filter(el => el != e.target);
+
+            let input_sum = min_inputs.reduce((p, c) => {
+                let val = parseInt(c.value);
+                if (val) {
+
+                    return p + val;
+                }
+                return p;
+            }, 0)
+
+            let remain = total - input_sum;;
+
+            if (enterVal > remain) {
+                alert(`You can add minimum quota upto ${remain}`);
+                e.target.value = 0
+            }
+        }
+
+        window.validateReserve = function(e){
+            const total = parseInt(e.target.closest("#country-table").getAttribute("data-reserve"));
+
+            let min_inputs = Array.from(document.querySelectorAll("[name='reserve_quota']"));
+            let enterVal = parseInt(e.target.value);
+
+            min_inputs = min_inputs.filter(el => el != e.target);
+
+            let input_sum = min_inputs.reduce((p, c) => {
+                let val = parseInt(c.value);
+                if (val) {
+
+                    return p + val;
+                }
+                return p;
+            }, 0)
+
+            let remain = total - input_sum;;
+
+            if (enterVal > remain) {
+                alert(`You can add minimum quota upto ${remain}`);
+                e.target.value = 0
+            }
+        }
+
+        window.onlyNumberKey = (evt) => {
+
+            // Only ASCII character in that range allowed
+            var ASCIICode = (evt.which) ? evt.which : evt.keyCode
+            if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 57))
+                return false;
+            return true;
+        }
+
+        window.save = function(){
+            const table = document.querySelector('#country-table');
+            const quota_id = table.getAttribute('data-id');
+            
+            const min_quota = Array.from(table.querySelectorAll("[name='min_quota']")); 
+            const max_quota = Array.from(table.querySelectorAll("[name='max_quota']")); 
+            const reserve_quota = Array.from(table.querySelectorAll("[name='reserve_quota']")); 
+
+            let min_quota_valid = true, max_quota_valid = true, reserve_quota_valid = true;
+            const data = [];
+
+            min_quota.forEach( el => {
+                if( !el.value ){
+                    min_quota_valid = false
+                }
+            });
+            max_quota.forEach( el => {
+                if( !el.value ){
+                    max_quota_valid = false
+                }
+            });
+            reserve_quota.forEach( el => {
+                if( !el.value ){
+                    reserve_quota_valid = false
+                }
+            });
+
+            if (!min_quota_valid){
+                alert("Minimum quota all field required");
+            }
+            else if (!max_quota_valid){
+                alert("Maximum quota all field required");
+            }
+            else if (!reserve_quota_valid){
+                alert("Reserve quota all field required");
+            }
+
+            else{   
+                const tr = table.querySelectorAll('tbody tr');
+
+                tr.forEach( el => {
+                    let min_quota = el.querySelector("[name='min_quota']").value;
+                    let max_quota = el.querySelector("[name='max_quota']").value;
+                    let reserve_quota = el.querySelector("[name='reserve_quota']").value;
+                    let country = el.getAttribute('data-country');
+                    let obj = {
+                        quota_id,min_quota,max_quota,reserve_quota,country
+                    }
+
+                    data.push( obj );
+                });
+
+                Ajax.post('/reserve-quota', data);
+            }
+
+        }
+
+        let reservationTable;
+
+        if (  reservationTable = document.querySelector("#reservations-table tbody") ){
+
+            const trNodes = [];
+            reservations.forEach((item, i) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${Quota[item.sport].name}</td>
+                    <td>${item.gender == "male" ? "Male" : "Female" }</td>
+                    <td>${Quota[item.sport].categories[item.gender][item.category]}</td>
+                    <td>${item.country}</td>
+                    <td>${item.min_quota}</td>
+                    <td>${item.max_quota}</td>
+                    <td>${item.reserve_quota}</td>
+                    `;
+                trNodes.push(tr);
+            });
+            reservationTable.append(...trNodes);
+        }   
     }
 }
