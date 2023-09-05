@@ -276,7 +276,7 @@ document.onreadystatechange = function () {
 
                     Ajax.get("get-quota", { sport: sports.value, gender: gender.value, category: categories.value })
                         .then(res => {
-                            if (Object.keys(res.data).length > 0) {
+                            if (res && Object.keys(res.data).length > 0) {
 
                                 document.querySelector('#country-table').setAttribute('data-min', res.data.min_quota)
                                 document.querySelector('#country-table').setAttribute('data-max', res.data.max_quota)
