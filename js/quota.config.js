@@ -454,7 +454,21 @@ document.onreadystatechange = function () {
                     data.push( obj );
                 });
 
-                Ajax.post('/reserve-quota', data);
+                Ajax.post('/reserve-quota', data).then( res => {
+                    if( res.success ){
+                        const toast = document.querySelector("#toast-quota");
+                        toast.querySelector(".toast-body").innerHTML = `<p class='m-0 text-success'>${res.message}</p>`;
+
+                        Object.assign(toast.style, { zIndex: 1050 });
+                        (new bootstrap.Toast(toast, {
+                            delay: 3000
+                        })).show();
+
+                        setTimeout(function(){
+                            location.href = "/reserved-quota";
+                        }, 3000);
+                    }
+                });
             }
 
         }
