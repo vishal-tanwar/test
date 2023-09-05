@@ -464,9 +464,11 @@ document.onreadystatechange = function () {
         if (  reservationTable = document.querySelector("#reservations-table tbody") ){
 
             const trNodes = [];
-            reservations.forEach((item, i) => {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
+            if (reservations.length>0){
+
+                reservations.forEach((item, i) => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
                     <td>${item.id}</td>
                     <td>${Quota[item.sport].name}</td>
                     <td>${item.gender == "male" ? "Male" : "Female" }</td>
@@ -476,8 +478,14 @@ document.onreadystatechange = function () {
                     <td>${item.max_quota}</td>
                     <td>${item.reserve_quota}</td>
                     `;
+                    trNodes.push(tr);
+                });
+            }
+            else{
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td rowspan="8">No Record Found</td>`
                 trNodes.push(tr);
-            });
+            }
             reservationTable.append(...trNodes);
         }   
     }
