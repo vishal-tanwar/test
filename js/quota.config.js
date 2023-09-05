@@ -483,7 +483,7 @@ document.onreadystatechange = function () {
             }
             else{
                 const tr = document.createElement("tr");
-                tr.innerHTML = `<td colspan="8"><p class="m-0 text-center fw-bold fs-4">No Record Found</p></td>`
+                tr.innerHTML = `<td colspan="8"><p class="m-0 text-center fw-bold fs-4">No Record Found.</p></td>`
                 trNodes.push(tr);
             }
             reservationTable.append(...trNodes);
